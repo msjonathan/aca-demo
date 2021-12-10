@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "acs-status-sender": {
+      "commandName": "Project",
+      "commandLineArgs": " \"Endpoint=sb://sb-acs-demo-ns.servicebus.windows.net/;SharedAccessKeyName=ListenAndSend;SharedAccessKey=m8kmAZktAvtzkVpzVmrMZi4IbWK7hkD/cajGO5cd9Hc=;EntityPath=status\" \"status\" 200"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+# building a new version 
+ docker build -t jonathancontainerregistry.azurecr.io/acs-weather-api:2 .
+
+ # set the active subscription
+ az account set --subscription "Playground"
+
+# build image 
+az login
+az acr login --name jonathancontainerregistry --subscription "Playground"
+docker push ... 
+
+# or 
+az login
+az acr build -t jonathancontainerregistry.azurecr.io/acs-weather-api:2 . --registry jonathancontainerregistry --subscription "Playground"
+
+$acrUser=$(az acr credential show -n jonathancontainerregistry --subscription "Playground" --query username -o tsv)
+$acrPassword=$(az acr credential show -n jonathancontainerregistry --subscription "Playground" --query "passwords[0].value" -o tsv)
+
+# create a resource group - make sure it's in northeurope or canadacentral
+az group create -n "pg-jonathan-acs" -l northeurope --subscription "Playground"
+
+# List all revisions 
+az containerapp  revision list -n acs-weather-api -g acs-demo -o table
+
+# deploy a container app
+az deployment group create -g acs-demo -f .\main.bicep -p containerImage=jonathancontainerregistry.azurecr.io/acs-weather-api:8 containerPort=5001 registry=jonathancontainerregistry.azurecr.io registryUsername=$acrUser registryPassword=$acrPassword
+
+# call app (change fqdn)
+curl --silent https://acs-weather-api.graybeach-d4954b40.northeurope.azurecontainerapps.io/weatherforecast | jq
+
+
+# creating an azure function hosted in a docker
+ func init --worker-runtime dotnet --docker
+ # adding a queue binding to that processor
+ func new --template "Queue Trigger" --name StatusProcessor
+
+ # Create servicebus resources 
+ az deployment group create -g acs-demo -f .\main.bicep -p serviceBusNamespaceName=sb-acs-demo-ns serviceBusQueueName=status
+
+# build the function container
+ az acr build -t jonathancontainerregistry.azurecr.io/acs-status-processor:1 . --registry jonathancontainerregistry --subscription "Playground"
+
+az deployment group create -g acs-demo -f .\main.bicep -p statusProcessorImage=acs-status-processor:2 weatherApiImage=acs-weather-api:8 containerPort=5001 serviceBusNamespaceName=sb-acs-demo-ns serviceBusQueueName=status registry=jonathancontainerregistry.azurecr.io registryUsername=$acrUser registryPassword=$acrPassword
+
+# send messages
+.\acs-status-sender.exe "<connectionstring>" "status" 500
+
+
+# query processor logs 
+ContainerAppConsoleLogs_CL
+| where ContainerGroupName_s contains "acs-status-processor"
+| order by TimeGenerated desc 
+| project  TimeGenerated, ContainerAppName_s, Log_s, ContainerGroupId_g
+
+# list nr of containers
+ContainerAppConsoleLogs_CL
+| where ContainerGroupName_s contains "acs-status-processor"
+| distinct ContainerId_s
+
+
