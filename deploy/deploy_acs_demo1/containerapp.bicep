@@ -40,6 +40,7 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
       }
     }
     template: {
+      // the possiblity to deploy one or more containers for the same app (e.g. side-car pattern)
       containers: [
         {
           image: containerImage

@@ -1,6 +1,7 @@
 param location string
 param name string
 
+// an log analytis workspace is needed 
 resource law 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: name
   location: location
