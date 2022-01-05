@@ -28,6 +28,8 @@ az deployment group create -g acs-demo -f .\main.bicep -p containerImage=jonatha
 # call app (change fqdn)
 curl --silent https://acs-weather-api.graybeach-d4954b40.northeurope.azurecontainerapps.io/weatherforecast | jq
 
+# call api multiple times to showcase traffic splitting (when a new version is deployed)
+for i in `seq 1 20`;do curl --silent https://acs-weather-api.graybeach-d4954b40.northeurope.azurecontainerapps.io/weatherforecast | jq;done
 
 # creating an azure function hosted in a docker
  func init --worker-runtime dotnet --docker
@@ -40,7 +42,7 @@ curl --silent https://acs-weather-api.graybeach-d4954b40.northeurope.azurecontai
 # build the function container
  az acr build -t jonathancontainerregistry.azurecr.io/acs-status-processor:1 . --registry jonathancontainerregistry --subscription "Playground"
 
-az deployment group create -g acs-demo -f .\main.bicep -p statusProcessorImage=acs-status-processor:2 weatherApiImage=acs-weather-api:8 containerPort=5001 serviceBusNamespaceName=sb-acs-demo-ns serviceBusQueueName=status registry=jonathancontainerregistry.azurecr.io registryUsername=$acrUser registryPassword=$acrPassword
+az deployment group create -g acs-demo -f .\main.bicep -p statusProcessorImage=acs-status-processor:4 weatherApiImage=acs-weather-api:8 containerPort=5001 serviceBusNamespaceName=sb-acs-demo-ns serviceBusQueueName=status registry=jonathancontainerregistry.azurecr.io registryUsername=$acrUser registryPassword=$acrPassword
 
 # send messages
 .\acs-status-sender.exe "<connectionstring>" "status" 500
@@ -56,5 +58,10 @@ ContainerAppConsoleLogs_CL
 ContainerAppConsoleLogs_CL
 | where ContainerGroupName_s contains "acs-status-processor"
 | distinct ContainerId_s
+
+
+# query nr of revisions
+az containerapp  revision show --app acs-status-processor -n acs-status-processor--5a8hugl -g acs-demo --query '[replicas]'
+
 
 
