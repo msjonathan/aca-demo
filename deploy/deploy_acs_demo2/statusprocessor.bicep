@@ -18,6 +18,7 @@ resource containerAppStatusProcessor 'Microsoft.Web/containerApps@2021-03-01' = 
   properties: {
     kubeEnvironmentId: containerAppEnvironmentId
     configuration: {
+      activeRevisionsMode: 'single'
       secrets: [
         {
           name: 'container-registry-password'
