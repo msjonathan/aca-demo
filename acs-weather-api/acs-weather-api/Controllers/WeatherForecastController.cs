@@ -29,7 +29,7 @@ namespace acs_weather_api.Controllers
             var rng = new Random();
             return Enumerable.Range(1,1).Select(index => 
             new { 
-                Version = 3, 
+                Version = 5, 
                 ForeCast = new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
