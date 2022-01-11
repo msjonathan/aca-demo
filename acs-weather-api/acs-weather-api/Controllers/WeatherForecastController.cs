@@ -27,7 +27,7 @@ namespace acs_weather_api.Controllers
         public IEnumerable<object> Get()
         {
             var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => 
+            return Enumerable.Range(1,1).Select(index => 
             new { 
                 Version = 3, 
                 ForeCast = new WeatherForecast
