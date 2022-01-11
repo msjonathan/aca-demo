@@ -55,7 +55,7 @@ resource containerAppStatusProcessor 'Microsoft.Web/containerApps@2021-03-01' = 
                 type: 'azure-servicebus'
                 metadata: {
                   queueName: 'status'
-                  messageCount: '2'
+                  messageCount: '50'
                   connectionFromEnv: 'service-bus-connectionstring'
                 }
                 auth: [

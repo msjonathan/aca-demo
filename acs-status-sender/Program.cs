@@ -15,9 +15,14 @@ IList<ServiceBusMessage> messagesToSend = new List<ServiceBusMessage>();
 for (int i = 0; i <  Convert.ToInt32(nrOfMessage); i++)
 {
     messagesToSend.Add(new ServiceBusMessage($"message nr: {i}"));
-}
 
-await sender.SendMessagesAsync(messagesToSend);
+    if(i % 10 == 0)
+    {
+        await sender.SendMessagesAsync(messagesToSend);
+        messagesToSend.Clear();
+        Console.WriteLine("Batch of 10 sent");
+    }
+}
 
 Console.WriteLine("done sending");
 Console.ReadKey();
